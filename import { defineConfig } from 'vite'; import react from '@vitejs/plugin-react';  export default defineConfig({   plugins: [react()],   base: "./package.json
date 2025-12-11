@@ -1,0 +1,58 @@
+{
+  "name": "scout-management",
+  "version": "1.0.0",
+  "main": "electron-main.js",
+  "description": "Scout Management Desktop Application - Tunisia",
+  "author": "Ihsen Chaieb",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "electron": "electron .",
+    "start": "npm run build && electron .",
+    "dist": "npm run build && electron-builder --win --x64"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "electron": "^28.0.0",
+    "electron-builder": "^24.6.0",
+    "typescript": "^5.2.0",
+    "vite": "^5.0.0"
+  },
+  "build": {
+    "appId": "tn.scout.management",
+    "productName": "Scout Management Sidi Bou Ali",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron-main.js",
+      "preload.js",
+      "icon.png"
+    ],
+    "win": {
+      "icon": "icon.png",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "runAfterFinish": false
+    }
+  }
+}
