@@ -1,4 +1,4 @@
-name: Build Electron app (Windows)
+name: Build Windows Installer (Electron + Vite)
 
 on:
   push:
@@ -7,67 +7,61 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-win:
+  build:
     runs-on: windows-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Use Node.js 20.x
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
-      - name: Build Vite app
+      - name: Build Vite App
         run: npm run build
 
-      - name: Install electron-builder
-        run: npm install -g electron-builder@24.6.0
-
-      - name: Build Windows installer (nsis)
-        run: |
-          npx electron-builder --windows nsis --x64
+      - name: Build Electron Windows Installer
+        run: npx electron-builder --win --x64
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload release artifact
+      - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: windows-installer
-          path: |
-            release/**/*
+          path: release/*
 
-  create-release:
-    needs: build-win
+  release:
+    needs: build
     runs-on: ubuntu-latest
+
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
           name: windows-installer
-          path: release-files
+          path: dist-release
 
-      - name: Create GitHub Release
+      - name: Create Release
         id: create_release
-        uses: actions/create-release@v1
+        uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ github.run_number }}
-          release_name: "Build ${{ github.run_number }}"
+          name: "Build ${{ github.run_number }}"
           draft: false
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload Release Asset (exe / installer)
-        uses: actions/upload-release-asset@v1
+      - name: Upload Installer to Release
+        uses: softprops/action-gh-release@v1
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: release-files/release
-          asset_name: "scout-management-setup-${{ github.run_number }}.zip"
-          asset_content_type: application/zip
+          files: dist-release/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
